@@ -20,7 +20,7 @@ const jokes = [
 const shuffle = (array) => {
   const shuffledArray = array;
 
-  for (let i = 0; i < shuffledArray.length; i + 1) {
+  for (let i = 0; i < shuffledArray.length; i += 1) {
     const alt = shuffledArray[i];
     const rand = Math.floor(Math.random() * jokes.length);
 
