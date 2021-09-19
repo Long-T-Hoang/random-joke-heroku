@@ -5,6 +5,7 @@ const http = require('http');
 
 // 2 - pull in URL and query modules (for URL parsing)
 const url = require('url');
+const query = require('querystring');
 
 const htmlHandler = require('./htmlResponses');
 const jsonHandler = require('./jsonResponses');
@@ -14,6 +15,7 @@ const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
 const urlStruct = {
   '/random-joke': jsonHandler.getRandomJokeResponse,
+  '/random-jokes': jsonHandler.getRandomJokesResponse,
   notFound: htmlHandler.get404Response,
 };
 
@@ -21,19 +23,18 @@ const urlStruct = {
 // this time we will look at the `pathname`, and send back the appropriate page
 // note that in this course we'll be using arrow functions 100% of the time in our server-side code
 const onRequest = (request, response) => {
-  console.log(request.headers);
   const parsedUrl = url.parse(request.url);
   const { pathname } = parsedUrl;
+  let params = query.parse(parsedUrl.query);
 
-  //console.log('parsedUrl=', parsedUrl);
-  //console.log('pathname=', pathname);
+  // console.log(request.headers);
+  // console.log('parsedUrl=', parsedUrl);
+  // console.log('pathname=', pathname);
+  //console.log(params);
 
-  if(urlStruct[pathname])
-  {
-    urlStruct[pathname](request, response);
-  }
-  else
-  {
+  if (urlStruct[pathname]) {
+    urlStruct[pathname](request, response, params);
+  } else {
     urlStruct.notFound(request, response);
   }
 };
