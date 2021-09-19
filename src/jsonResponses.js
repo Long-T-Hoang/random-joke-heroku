@@ -18,19 +18,18 @@ const jokes = [
 ];
 
 const shuffle = (array) => {
-    const shuffledArray = array;
+  const shuffledArray = array;
 
-    for ( let i = 0; i < shuffledArray.length; i++)
-    {
-        const alt = shuffledArray[i];
-        const rand = Math.floor(Math.random() * jokes.length);
+  for (let i = 0; i < shuffledArray.length; i + 1) {
+    const alt = shuffledArray[i];
+    const rand = Math.floor(Math.random() * jokes.length);
 
-        shuffledArray[i] = shuffledArray[rand];
-        shuffledArray[rand] = alt;
-    }
+    shuffledArray[i] = shuffledArray[rand];
+    shuffledArray[rand] = alt;
+  }
 
-    return shuffledArray;
-}
+  return shuffledArray;
+};
 
 // get joke(s)
 const getRandomJoke = () => {
@@ -40,7 +39,7 @@ const getRandomJoke = () => {
 };
 
 const getRandomJokes = (limit = 1) => {
-  let jokeLimit = parseInt(limit);
+  let jokeLimit = parseInt(limit, 10);
 
   if (jokeLimit < 1) jokeLimit = 1;
   else if (jokeLimit > jokes.length) jokeLimit = jokes.length;
@@ -52,9 +51,9 @@ const getRandomJokes = (limit = 1) => {
 
 const getRandomJokesResponse = (request, response, params) => {
   response.writeHead(200, { 'Content-Type': 'text/plain' });
-  
-    response.write(getRandomJokes(params.limit));
-  
+
+  response.write(getRandomJokes(params.limit));
+
   response.end();
 };
 
