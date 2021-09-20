@@ -17,6 +17,7 @@ const jokes = [
   { q: 'What do you get when you cross a snowman with a vampire?', a: 'Frostbite' },
 ];
 
+// shuffle jokes array
 const shuffle = (array) => {
   const shuffledArray = array;
 
@@ -31,14 +32,20 @@ const shuffle = (array) => {
   return shuffledArray;
 };
 
-// get joke(s)
-const getRandomJoke = () => {
-  const number = Math.floor(Math.random() * jokes.length);
+// get one joke
+const getRandomJoke = (joke) => JSON.stringify(joke);
 
-  return JSON.stringify(jokes[number]);
+const getRandomJokeXML = (joke) => {
+  const xmlResponse = `<joke>
+    <q>${joke.q}</q>
+    <a>${joke.a}</a>
+  </joke>`;
+
+  return xmlResponse;
 };
 
-const getRandomJokes = (limit = 1) => {
+// get multiple jokes
+const getMultiRandomJokes = (limit = 1) => {
   let jokeLimit = parseInt(limit, 10);
 
   if (jokeLimit < 1) jokeLimit = 1;
@@ -46,24 +53,60 @@ const getRandomJokes = (limit = 1) => {
   jokeLimit = Math.floor(jokeLimit);
 
   const jokesResponse = shuffle(jokes).slice(0, limit);
-  return JSON.stringify(jokesResponse);
+  return jokesResponse;
 };
 
-const getRandomJokesResponse = (request, response, params) => {
-  response.writeHead(200, { 'Content-Type': 'text/plain' });
+const getMultiRandomJokesJSON = (jokeList) => JSON.stringify(jokeList);
 
-  response.write(getRandomJokes(params.limit));
+const getMultiRandomJokesXML = (jokeList) => {
+  let xmlResponse = '<jokes>';
 
+  for (let i = 0; i < jokeList.length; i += 1) {
+    xmlResponse
+    += `<joke>
+    <q>${jokeList[i].q}</q>
+    <a>${jokeList[i].a}</a>
+    </joke>`;
+  }
+
+  xmlResponse += '</jokes>';
+
+  return xmlResponse;
+};
+
+// responses
+const respond = (request, response, content, type) => {
+  response.writeHead(200, { 'Content-Type': type });
+  response.write(content);
   response.end();
 };
 
-const getRandomJokeResponse = (request, response) => {
-  response.writeHead(200, { 'Content-Type': 'text/plain' });
-  response.write(getRandomJoke());
-  response.end();
+const getMultiRandomJokeResponse = (request, response, acceptedTypes, params) => {
+  // pick out one joke
+  const jokeList = getMultiRandomJokes(params.limit);
+
+  // write response based on accept header
+  if (acceptedTypes.includes('text/xml')) {
+    return respond(request, response, getMultiRandomJokesXML(jokeList), 'text/xml');
+  }
+
+  return respond(request, response, getMultiRandomJokesJSON(jokeList), 'application/json');
+};
+
+const getRandomJokeResponse = (request, response, acceptedTypes) => {
+  // pick out one joke
+  const number = Math.floor(Math.random() * jokes.length);
+  const joke = jokes[number];
+
+  // write response based on accept header
+  if (acceptedTypes.includes('text/xml')) {
+    return respond(request, response, getRandomJokeXML(joke), 'text/xml');
+  }
+
+  return respond(request, response, getRandomJoke(joke), 'application/json');
 };
 
 module.exports = {
   getRandomJokeResponse,
-  getRandomJokesResponse,
+  getMultiRandomJokeResponse,
 };
