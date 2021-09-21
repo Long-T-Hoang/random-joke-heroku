@@ -32,6 +32,11 @@ const shuffle = (array) => {
   return shuffledArray;
 };
 
+// ALWAYS GIVE CREDIT - in your code comments and documentation
+// Source: https://stackoverflow.com/questions/2219526/how-many-bytes-in-a-javascript-string/29955838
+// Refactored to an arrow function by ACJ
+const getBinarySize = (string) => Buffer.byteLength(string, 'utf8');
+
 // get one joke
 const getRandomJoke = (joke) => JSON.stringify(joke);
 
@@ -75,35 +80,42 @@ const getMultiRandomJokesXML = (jokeList) => {
 };
 
 // responses
-const respond = (request, response, content, type) => {
-  response.writeHead(200, { 'Content-Type': type });
-  response.write(content);
-  response.end();
+const respond = (request, response, content, type, httpMethod) => {
+  if (httpMethod !== 'HEAD') {
+    response.writeHead(200, { 'Content-Type': type });
+    response.write(content);
+    response.end();
+  } else {
+    const contentLength = getBinarySize(content);
+
+    response.writeHead(200, { 'Content-Type': type, 'Content-Length': contentLength });
+    response.end();
+  }
 };
 
-const getMultiRandomJokeResponse = (request, response, acceptedTypes, params) => {
+const getMultiRandomJokeResponse = (request, response, acceptedTypes, params, httpMethod) => {
   // pick out one joke
   const jokeList = getMultiRandomJokes(params.limit);
 
   // write response based on accept header
   if (acceptedTypes.includes('text/xml')) {
-    return respond(request, response, getMultiRandomJokesXML(jokeList), 'text/xml');
+    return respond(request, response, getMultiRandomJokesXML(jokeList), 'text/xml', httpMethod);
   }
 
-  return respond(request, response, getMultiRandomJokesJSON(jokeList), 'application/json');
+  return respond(request, response, getMultiRandomJokesJSON(jokeList), 'application/json', httpMethod);
 };
 
-const getRandomJokeResponse = (request, response, acceptedTypes) => {
+const getRandomJokeResponse = (request, response, acceptedTypes, params, httpMethod) => {
   // pick out one joke
   const number = Math.floor(Math.random() * jokes.length);
   const joke = jokes[number];
 
   // write response based on accept header
   if (acceptedTypes.includes('text/xml')) {
-    return respond(request, response, getRandomJokeXML(joke), 'text/xml');
+    return respond(request, response, getRandomJokeXML(joke), 'text/xml', httpMethod);
   }
 
-  return respond(request, response, getRandomJoke(joke), 'application/json');
+  return respond(request, response, getRandomJoke(joke), 'application/json', httpMethod);
 };
 
 module.exports = {
